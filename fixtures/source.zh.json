@@ -1,0 +1,10 @@
+[
+  {"message": "窗外的雨还没有停。", "scene": "station_rain", "meta": {"lineId": 101, "tags": ["旁白", "雨夜"]}},
+  {"name": "小夏", "message": "最后一班车已经走了。", "voice": "xia_002.ogg"},
+  {"name": "林", "message": "你不是说今天不会下雨吗？", "meta": {"lineId": 103, "enabled": true}},
+  {"name": "小夏", "message": "我说的是明天。\n今天的预报，我根本没看。"},
+  {"message": "她把伞递给了林，自己却退回屋檐下。", "meta": {"lineId": 105, "camera": {"x": 0, "y": -2}}},
+  {"name": "小夏", "message": "{player}，你先走吧。我还要等人。", "expression": null},
+  {"name": "林", "message": "\\c[2]我不会把你一个人留在这里。\\c[0]", "wait": 250},
+  {"message": "雨声盖住了她轻轻的一声“谢谢”。", "meta": {"lineId": 108, "tags": []}}
+]

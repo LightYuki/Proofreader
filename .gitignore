@@ -1,0 +1,34 @@
+# Dependencies and generated build output
+/node_modules/
+/dist/
+/src-tauri/target/
+/src-tauri/gen/
+/release/
+
+# Local caches, backups and agent tooling
+/.cache/
+/.agents/
+/.codex/
+/skills-lock.json
+
+# Local credentials and settings
+.env
+.env.*
+!.env.example
+*.local
+*.pem
+*.key
+/settings.json
+/workspace.json
+/settings.recovery-*.json
+/workspace.recovery-*.json
+/instance.pid
+
+# Editor and operating-system files
+/.idea/
+/.vscode/
+*.log
+*.tsbuildinfo
+.DS_Store
+Thumbs.db
+Desktop.ini

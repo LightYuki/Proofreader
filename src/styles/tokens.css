@@ -1,0 +1,37 @@
+:root {
+  color-scheme: light;
+  --paper: #ffffff;
+  --canvas: #f0f0f0;
+  --surface-subtle: #f7f7f7;
+  --surface-hover: #f0f0f0;
+  --surface-selected: #eeeeee;
+  --line: #dfdfdf;
+  --line-strong: #bdbdbd;
+  --text: #222222;
+  --muted: #5c5c5c;
+  --faint: #6a6a6a;
+  --accent: #242424;
+  --accent-hover: #404040;
+  --accent-soft: #ededed;
+  --focus: #525252;
+  --success: #333333;
+  --warning: #444444;
+  --danger: #333333;
+  --danger-soft: #f0f0f0;
+  --diff-added: #e1e1e1;
+  --diff-removed: #f1f1f1;
+  /* Color is reserved for solid review lamps; surrounding UI stays neutral. */
+  --indicator-pending: #d97706;
+  --indicator-accepted: #16a34a;
+  --indicator-failed: #dc2626;
+  --indicator-neutral: #737373;
+  --on-accent: #ffffff;
+  --overlay: #00000038;
+  --popup-shadow: 0 2px 6px #00000014;
+  --dialog-shadow: 0 4px 12px #0000001a;
+  --radius: 0px;
+  --popup-radius: 2px;
+  --font-ui: "Segoe UI", "Microsoft YaHei UI", "Microsoft YaHei", sans-serif;
+  --review-width: clamp(288px, 27vw, 372px);
+  --navigation-width: 192px;
+}

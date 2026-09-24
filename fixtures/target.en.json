@@ -1,0 +1,10 @@
+[
+  {"message": "The rain outside still hadn't stopped.", "scene": "station_rain", "meta": {"lineId": 101, "tags": ["旁白", "雨夜"]}},
+  {"name": "Xia", "message": "The last train hasn't left yet.", "voice": "xia_002.ogg"},
+  {"name": "Lin", "message": "Didn't you say it wouldn't rain today?", "meta": {"lineId": 103, "enabled": true}},
+  {"name": "Xia", "message": "I meant tomorrow.\nI didn't even check today's forecast."},
+  {"message": "He handed Lin the umbrella, then stepped back beneath the eaves.", "meta": {"lineId": 105, "camera": {"x": 0, "y": -2}}},
+  {"name": "Xia", "message": "{player}, go on ahead. I'm still waiting for someone.", "expression": null},
+  {"name": "Lin", "message": "\\c[2]I won't leave you here alone.\\c[0]", "wait": 250},
+  {"message": "The rain drowned out her quiet ‘thank you’.", "meta": {"lineId": 108, "tags": []}}
+]

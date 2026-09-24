@@ -1,0 +1,5 @@
+{
+  "batchSize": 30,
+  "contextBefore": 15,
+  "contextAfter": 15
+}
