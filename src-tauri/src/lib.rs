@@ -3,8 +3,8 @@ mod llm;
 mod policy;
 mod prompts;
 mod settings;
-mod workspace;
 mod single_instance;
+mod workspace;
 
 use documents::{AcceptedChange, DocumentData, DocumentSession};
 use llm::BatchRequest;
@@ -63,7 +63,10 @@ fn save_workspace(workspace: serde_json::Value, state: State<'_, AppState>) -> R
 }
 
 #[tauri::command]
-async fn list_models(settings: ModelSettingsInput, state: State<'_, AppState>) -> Result<Vec<String>, String> {
+async fn list_models(
+    settings: ModelSettingsInput,
+    state: State<'_, AppState>,
+) -> Result<Vec<String>, String> {
     let key = settings::effective_key(&state.settings_path, &settings)?;
     llm::list_models(&state.client, &settings.base_url, &key).await
 }
@@ -172,7 +175,9 @@ pub fn run() {
             std::fs::create_dir_all(&directory)?;
             #[cfg(windows)]
             match single_instance::acquire(&directory) {
-                Ok(Some(guard)) => { app.manage(guard); }
+                Ok(Some(guard)) => {
+                    app.manage(guard);
+                }
                 result => {
                     if let Err(message) = result {
                         use tauri_plugin_dialog::DialogExt;

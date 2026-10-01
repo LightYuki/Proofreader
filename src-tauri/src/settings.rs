@@ -106,7 +106,10 @@ fn select_key(
     if let Some(key) = &input.api_key {
         return Ok(key.trim().to_owned());
     }
-    if saved.disable_saved_key || saved.legacy_use_api_key == Some(false) || !same_origin(&input.base_url, &saved.base_url)? {
+    if saved.disable_saved_key
+        || saved.legacy_use_api_key == Some(false)
+        || !same_origin(&input.base_url, &saved.base_url)?
+    {
         return Ok(String::new());
     }
     Ok(saved_key.unwrap_or_default().trim().to_owned())
@@ -129,7 +132,10 @@ pub fn effective_key(path: &Path, input: &ModelSettingsInput) -> Result<String, 
         return Ok(key.trim().to_owned());
     }
     let saved = load(path)?;
-    if saved.disable_saved_key || saved.legacy_use_api_key == Some(false) || !same_origin(&input.base_url, &saved.base_url)? {
+    if saved.disable_saved_key
+        || saved.legacy_use_api_key == Some(false)
+        || !same_origin(&input.base_url, &saved.base_url)?
+    {
         return Ok(String::new());
     }
     select_key(input, &saved, api_key()?.as_deref())
@@ -173,9 +179,14 @@ fn persist_settings(
 pub fn save(path: &Path, input: ModelSettingsInput) -> Result<ModelSettings, String> {
     let mut settings = validate(&input)?;
     let saved = load(path)?;
-    let no_key = input.api_key.as_ref().is_some_and(|key| key.trim().is_empty())
-        || (input.api_key.is_none() && (saved.disable_saved_key || saved.legacy_use_api_key == Some(false)
-            || !same_origin(&input.base_url, &saved.base_url)?));
+    let no_key = input
+        .api_key
+        .as_ref()
+        .is_some_and(|key| key.trim().is_empty())
+        || (input.api_key.is_none()
+            && (saved.disable_saved_key
+                || saved.legacy_use_api_key == Some(false)
+                || !same_origin(&input.base_url, &saved.base_url)?));
     if no_key {
         settings.disable_saved_key = true;
         // An inaccessible vault is left intact. Persist the opt-out so it cannot
@@ -183,7 +194,10 @@ pub fn save(path: &Path, input: ModelSettingsInput) -> Result<ModelSettings, Str
         if let (Some(_), Ok(previous)) = (&input.api_key, api_key()) {
             persist_settings(path, &settings, previous.as_deref(), None, write_key)?;
         } else {
-            atomic_write(path, &serde_json::to_vec_pretty(&settings).map_err(|e| e.to_string())?)?;
+            atomic_write(
+                path,
+                &serde_json::to_vec_pretty(&settings).map_err(|e| e.to_string())?,
+            )?;
         }
         return view(settings);
     }
@@ -202,20 +216,34 @@ pub fn save(path: &Path, input: ModelSettingsInput) -> Result<ModelSettings, Str
 
 pub fn reset(path: &Path) -> Result<ModelSettings, String> {
     if path.exists() {
-        let backup = path.with_file_name(format!("settings.recovery-{}.json", uuid::Uuid::new_v4()));
+        let backup =
+            path.with_file_name(format!("settings.recovery-{}.json", uuid::Uuid::new_v4()));
         fs::copy(path, backup).map_err(|e| format!("无法备份模型设置，尚未重建：{e}"))?;
     }
-    let settings = StoredSettings { disable_saved_key: true, ..StoredSettings::default() };
-    atomic_write(path, &serde_json::to_vec_pretty(&settings).map_err(|e| e.to_string())?)?;
+    let settings = StoredSettings {
+        disable_saved_key: true,
+        ..StoredSettings::default()
+    };
+    atomic_write(
+        path,
+        &serde_json::to_vec_pretty(&settings).map_err(|e| e.to_string())?,
+    )?;
     view(settings)
 }
 
 pub fn validate_saved(path: &Path) -> Result<ModelSettings, String> {
     let settings = load(path)?;
     crate::llm::endpoint(&settings.base_url)?;
-    if settings.model.trim().is_empty() { return Err("请先在设置中填写模型名称。".into()); }
+    if settings.model.trim().is_empty() {
+        return Err("请先在设置中填写模型名称。".into());
+    }
     let has_api_key = !saved_key(&settings)?.is_empty();
-    Ok(ModelSettings { base_url: settings.base_url, model: settings.model, has_api_key, credential_error: None })
+    Ok(ModelSettings {
+        base_url: settings.base_url,
+        model: settings.model,
+        has_api_key,
+        credential_error: None,
+    })
 }
 
 #[cfg(test)]

@@ -2,7 +2,12 @@
 name = "proofread"
 version = "1.0.0"
 description = "A focused visual novel translation review tool"
-authors = ["Proofread"]
+authors = ["LightYuki"]
+license = "GPL-3.0-or-later"
+repository = "https://github.com/LightYuki/Proofreader"
+homepage = "https://github.com/LightYuki/Proofreader"
+rust-version = "1.96"
+publish = false
 edition = "2021"
 
 [lib]

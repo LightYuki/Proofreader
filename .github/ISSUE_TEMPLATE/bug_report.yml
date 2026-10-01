@@ -1,0 +1,28 @@
+name: 缺陷反馈
+description: 提交可复现的问题；安全漏洞请使用 SECURITY.md 中的私密入口。
+body:
+  - type: input
+    id: version
+    attributes:
+      label: 应用版本与 Windows 版本
+      placeholder: Proofread 1.0.0 / Windows 11 x64
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 复现步骤
+      description: 尽量使用 fixtures 或人工编写的脱敏 JSON。不要上传 API Key、未授权剧本或 workspace.json。
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期行为与实际行为
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: 错误信息或截图（可选）
+      description: 请移除密钥、私人路径、服务地址中的凭据及敏感文本。

@@ -26,6 +26,15 @@
   },
   "bundle": {
     "active": true,
+    "publisher": "LightYuki",
+    "homepage": "https://github.com/LightYuki/Proofreader",
+    "copyright": "Copyright (C) 2026 LightYuki and contributors",
+    "license": "GPL-3.0-or-later",
+    "licenseFile": "../LICENSE",
+    "resources": {
+      "../LICENSE": "LICENSE",
+      "../NOTICE": "NOTICE"
+    },
     "targets": ["nsis"],
     "icon": ["icons/icon.ico", "icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png"],
     "windows": {

@@ -2,12 +2,27 @@
   "name": "proofread-desktop",
   "version": "1.0.0",
   "private": true,
+  "description": "A Windows desktop tool for reviewing visual novel translations",
+  "license": "GPL-3.0-or-later",
+  "author": "LightYuki",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LightYuki/Proofreader.git"
+  },
+  "homepage": "https://github.com/LightYuki/Proofreader#readme",
+  "bugs": "https://github.com/LightYuki/Proofreader/issues",
+  "engines": {
+    "node": ">=24 <25",
+    "npm": ">=11 <12"
+  },
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 1420 --strictPort",
     "build": "tsc -b && vite build",
     "preview": "vite preview --host 127.0.0.1",
     "test": "vitest run",
+    "check:project": "node scripts/check-project.mjs",
+    "check": "npm run check:project && npm test && npm run build",
     "tauri": "tauri"
   },
   "dependencies": {

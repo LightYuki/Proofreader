@@ -1,153 +1,99 @@
 # Proofread · 译文校润
 
-用于视觉小说译文校润的轻量 Windows 桌面工具，基于 Tauri 2、React、TypeScript 和 Rust。模型结合相邻台词提出明显问题的修改建议，人工确认后另存为校润版 JSON。
+用于视觉小说译文校润的 Windows 桌面工具。导入逐条对应的原文与译文 JSON，由模型结合上下文提出修改建议，人工确认后另存校润版。
 
-当前已实现文件导入、60／30 上下文分批、模型调用、连续双语审阅、手动编辑、停止／继续、失败批次重试和确认后保存。文件标签、最近打开和自动保存的工作记录用于跨文件、跨次继续审阅；模型设置支持可选密钥与模型列表。
+仓库名称为 **Proofreader**，应用名称为 **Proofread**。基于 Tauri 2、React、TypeScript 与 Rust，采用 [GPL-3.0-or-later](LICENSE)。
 
-应用版本统一为 **1.0.0**，在用户明确要求前不递增。界面统一显示“原文／译文”，具体语言直接写入校润要求。
+## 功能
 
-## 项目结构与版本记录
+- 连续双语阅读，逐条查看理由、上下文依据和修改差异。
+- 人工采用、保留原译或直接编辑；保存只写入已确认修改。
+- 支持 OpenAI 兼容模型接口、可选 API Key、模型列表和连接测试。
+- 支持停止、继续、失败批次重试、文件标签、最近记录和进度恢复。
+- 保留原 JSON 的额外字段，禁止覆盖导入的原文与译文。
 
-```text
-src/                 React 界面、审阅逻辑与现有前端测试
-  components/        共用菜单、文件标签、弹窗等组件
-  features/review/   检查流程、正文阅读、审阅与查找
-  features/workspace/ 工作记录捕获、恢复及持久化逻辑
-  core/              建议解析、归并和审阅规则
-  config/            默认要求及检查窗口配置
-  services/          Tauri 命令接口
-  styles/            界面设计变量
-src-tauri/           Rust 原生功能、Tauri 配置、Windows 图标
-  src/               文件、模型请求、凭据、进度与单实例
-  capabilities/      桌面权限声明
-shared/              前后端共用的检查窗口参数
-fixtures/            人工编写的联调样例与模拟服务
-assets/              应用图标 SVG 源文件
-docs/                产品规格、技术说明、审查及优化记录
-release/             本机保留的最新 EXE，不进入 Git
-.cache/              npm 缓存及本地历史备份，不进入 Git
+## 下载与使用
+
+公开构建在 [GitHub Releases](https://github.com/LightYuki/Proofreader/releases) 提供。若尚无 Release，请按下方步骤从源码构建；本地 `release/` 文件不是已发布版本。
+
+目前维护 Windows x64，需要 Microsoft Edge WebView2 Runtime。安装包会在缺少 WebView2 时联网安装；便携 ZIP 需自行准备运行时。当前构建未做代码签名，暂不支持自动更新。Windows 具体版本的兼容性以各 Release 的实际验收说明为准。
+
+1. 在“文件 → 打开…”中选择原文与译文 JSON。
+2. 在“校润要求”填写语言方向、风格、术语及可选剧情背景。
+3. 在“设置”填写模型服务地址、模型名称及可选 API Key。
+4. 开始检查，逐条决定是否采用建议，然后保存校润版。
+
+输入为等长 UTF-8 JSON 数组，按位置对应；`message` 为字符串，`name` 可选，其他字段保留：
+
+```json
+[
+  { "name": "小夏", "message": "你今天还要出去吗？", "id": 1002 }
+]
 ```
 
-Git 记录源码、现有测试、构建配置、依赖锁文件、必要图标、联调样例与文档。依赖安装目录、编译产物、发行包、历史备份、开发工具技能和本地密钥配置均不提交。`.gitattributes` 统一仓库文本换行；图标按二进制处理。`package-lock.json` 和 `src-tauri/Cargo.lock` 用于复现依赖，必须保留。
+完整操作、快捷键、恢复与重试规则见 [使用手册](docs/USER_GUIDE.md)。无需真实模型的体验与联调见 [人工样例和模拟服务](fixtures/README.md)。
 
-文档集中在 `docs/`：[产品规格](./docs/PRODUCT_SPEC.md)、[技术方案](./docs/TECH_STACK.md)、[架构审查](./docs/ARCHITECTURE_REVIEW.md)、[界面审查](./docs/UI_REVIEW.md)、[菜单规划](./docs/MENU_OPTIMIZATION_PLAN.md)和[优化实施记录](./docs/OPTIMIZATION_REVIEW.md)。这些文档中的代码路径以项目根目录为基准。
+校润会向你配置的模型服务发送当前批次的原文、译文、说话人及要求；模型可能出错，修改需人工确认。API Key 保存在 Windows 凭据管理器，配置和工作记录保存在本机应用配置目录。详情见 [安全政策](SECURITY.md)。
 
-2026-09-24 目录整理清理了约 9.65 GiB 的构建缓存、过期 EXE／ZIP、临时预览及未使用的平台图标。历史源码、设置和进度备份归档到 `.cache/archive/20260924-cleanup/`，只在本机保留；已安装的 `node_modules/` 和 npm 缓存继续用于开发。清理后的首次 Rust 构建需要重新编译依赖。
+## 开发
 
-## 开发与构建
+开发环境：
 
-开发环境需要 Node.js、npm、Rust MSVC 工具链、Microsoft C++ Build Tools／Windows SDK 和 WebView2 Runtime。本项目初始化时使用 Node.js 24、Rust 1.96；依赖版本以 `package-lock.json` 和 `src-tauri/Cargo.lock` 为准。
-
-在项目目录运行：
+- Node.js 24（版本见 `.node-version`）与 npm 11。
+- Rust MSVC 工具链（版本和组件见 `rust-toolchain.toml`）。
+- Visual Studio 2022 C++ Build Tools 的“使用 C++ 的桌面开发”组件与 Windows SDK。
+- WebView2 Runtime，详见 [Tauri 环境准备](https://v2.tauri.app/start/prerequisites/)。
 
 ```powershell
+git clone https://github.com/LightYuki/Proofreader.git
+cd Proofreader
 npm ci
 npm run tauri dev
 ```
 
-`npm run dev` 只启动浏览器界面预览；文件与模型功能需要通过 Tauri 桌面窗口使用。
+`npm run dev` 仅预览前端；文件、凭据、模型与进度功能需要 Tauri 桌面环境。
 
-构建 Windows NSIS 安装包：
-
-```powershell
-npm run tauri build
-```
-
-构建产物位于 `src-tauri/target/release/bundle/nsis/`，可执行程序位于 `src-tauri/target/release/proofread.exe`。发行版不附带 Node.js 或 Rust，复用系统 WebView2；系统缺少 WebView2 时，安装程序需要联网下载。
-
-只构建程序可执行 `npm run tauri -- build --no-bundle`。之前的 NSIS 打包受工具下载失败影响，采用独立 EXE 和便携 ZIP 交付；运行需要系统已安装 WebView2。
-
-2026-09-24 第二轮优化生成的 1.0.0 EXE 已转存到本机 `release/proofread.exe`，转存前后 SHA-256 一致。旧 ZIP、旧 EXE 与 Rust 编译缓存已清理。Git 不保存发行程序；重新构建仍输出到上文的 Tauri 默认目录，确认版本后可复制到 `release/`。构建信息与 SHA-256 见 [实施记录](./docs/OPTIMIZATION_REVIEW.md#本轮验证与交付)。
-
-运行检查：
+检查与构建：
 
 ```powershell
-npm test
-npm run build
-cargo test --manifest-path src-tauri/Cargo.toml
+npm run check
+cargo fmt --manifest-path src-tauri/Cargo.toml --all -- --check
+cargo clippy --manifest-path src-tauri/Cargo.toml --locked --all-targets -- -D warnings
+cargo test --manifest-path src-tauri/Cargo.toml --locked
+npm run tauri -- build --bundles nsis -- --locked
 ```
 
-测试覆盖窗口首尾边界、建议乱序与越界、人工审阅结果保留、完整 JSON 写回、HTTP 请求及错误处理。模拟接口的联调方式见 [fixtures/README.md](./fixtures/README.md)。
+安装包输出到 `src-tauri/target/release/bundle/nsis/`，程序输出到 `src-tauri/target/release/proofread.exe`。最终用户无需安装 Node.js 或 Rust。
 
-本轮验证：现有 70 项 Vitest、34 项 Rust 测试、前端生产构建及 Windows EXE 构建通过，未新增或修改测试。浏览器以内存样例核对了输入框、草稿待审、同名标签、查找／跳转、轮次选择、设置恢复界面、独立保存状态及 900×620 最小窗口。模拟 IPC 不代表原生文件操作、凭据异常、跨重启恢复或单实例激活已完整验收。
+## 源码结构
 
-组件静态渲染、CSS 变量引用和对比度的详细数值属于此前记录，不冒充本轮交互验收。现有测试包含旧语言字段的兼容读取、自由语言要求传递、模型列表、可选密钥、工作记录恢复和持久化失败处理。测试发现范围限定为 `src/**/*.test.{ts,tsx}`。尚未使用真实模型服务验证语言判断质量。
-
-## 使用
-
-1. 在“文件 → 打开…”中选择原文与对应译文 JSON。
-2. 在“校润要求 → 风格要求”中填写语言方向、语气和术语约定；“剧情背景”选填。
-3. 在“设置”中填写 Base URL，按需填写 API Key；点击“获取模型”后搜索并选择，也可直接填写模型名称，再测试连接。
-4. 点击“开始检查”。正文始终连续展示；右侧可查看理由、上下文依据、修改差异并编辑建议。
-5. 对需要的改动点击“采用”，其余选择“保留原译”。也可手动修改没有模型建议的台词；已采用的条目再次编辑后，点击“更新修改”。
-6. 点击“保存”。首次选择新的校润版输出文件，后续保存更新该校润版。
-
-无需单独选择语言。例如，风格要求可以写“原文为日语，译文为法语；保留人物口吻”。不写目标语言时，模型继续校润现有译文使用的语言；例如导入英文译文，就继续修改英文。修改理由与上下文依据使用中文。
-
-采用修改后停留在当前句。切换台词保留草稿；草稿必须再次采用才会更新输出。保留原译后再编辑会重新进入待审，人工编辑标记可防止重检覆盖成果。工作记录自动保存，底栏显示待保存／保存中／已保存／失败；JSON 输出状态独立。切换文件或关闭程序会先停止当前检查并写入进度；需要生成或更新译文 JSON 时，仍须点击“保存”。
-
-工作台使用黑白灰，修改对照用下划线表示新增、删除线表示删除。审阅栏行号旁显示 12px 实色状态灯：琥珀色表示待确认，绿色表示已采用，灰色表示保留原译或检查无建议；未检查为空心灰灯，检查中为黑色，失败为红色。悬停或键盘聚焦可查看说明，Esc 收起；已采用后再次编辑会回到琥珀色并计入待审，确认前保存仍使用上次采用的内容。文件标签中的灰色圆点和底栏单独表示 JSON 保存状态。
-
-上一／下一问题只定位仍需确认的条目。全部处理后可在问题列表的“全部”中回看已处理结果。
-
-### 长期工作与最近文件
-
-每对原文／译文对应一个文件标签，可在已打开的标签间切换。“文件 → 最近打开…”可重新打开之前的文件对，空工作台也提供最近记录入口。关闭标签保留最近记录及审阅进度。已关闭记录可“从最近列表隐藏”，只隐藏列表项，保留草稿、建议、人工决定及输出路径；隐藏状态跨重启保存。通过“打开…”重新选择同一文件对后恢复进度，并重新出现在最近列表中。隐藏不删除输入或输出 JSON；本轮不增加“最近关闭”入口。
-
-旧工作记录中的语言选项会被忽略，风格要求、背景及审阅进度保留。重启后恢复上次打开的标签和当前文件，以及各文件的建议、草稿、人工决定、批次状态、校润要求、当前行和输出路径。正在运行的批次恢复为待处理，用户点击继续后才发起请求；撤销历史不跨文件切换或重启保留。原文或译文内容发生变化时，重新载入并提示重置旧进度，避免把原有修改应用到变化后的条目。
-
-| 快捷键 | 操作 |
-| --- | --- |
-| `Ctrl+O` | 打开文件对 |
-| `Ctrl+W` | 关闭当前标签 |
-| `Ctrl+Enter` | 采用当前修改 |
-| `F8`／`Shift+F8` | 下一／上一待审问题 |
-| `Ctrl+S` | 保存校润版 |
-| `Ctrl+F` | 查找正文中的原文、当前译文和说话人；Enter／Shift+Enter 切换匹配 |
-| `Ctrl+G` | 跳转到指定行；使用从 1 开始的行号 |
-| 菜单键／`Shift+F10` | 在正文行号、文件标签、最近记录或可聚焦的审阅文字处打开右键菜单 |
-
-正文右键可复制选中文本、本条原文、当前显示的译文，定位编辑，或打开查找／行号跳转；“当前译文”沿用已确认内容，不包含未确认草稿。查找使用普通文本，Esc 收起临时浮层；不筛掉正文上下文。文件标签右键可关闭该文件或复制原文／译文路径；最近记录右键可打开、切换、复制路径或隐藏已关闭记录。审阅栏的原译文、理由和依据提供对应复制命令。输入框保留系统剪切、复制、粘贴和撤销菜单。
-
-菜单支持方向键、Home／End、Enter 和 Esc；一次只打开一个应用菜单。文字、图标操作无悬停底框，菜单和列表使用直角行高亮；输入框单层边框、hover 不变、focus 只加深原边框。按钮和输入框直角，浮层外层 2px，布局保持不变。实现范围见 [菜单与悬停交互优化规划](./docs/MENU_OPTIMIZATION_PLAN.md)。
-
-### JSON 文件
-
-原文与译文都是 UTF-8 JSON 数组，按数组位置一一对应，条目数量必须相同。`message` 必须是字符串，`name` 可选；支持 UTF-8 BOM。
-
-```json
-[
-  {"message": "窗外下起了雨。"},
-  {"name": "小夏", "message": "你今天还要出去吗？", "id": 1002}
-]
+```text
+src/                 React 界面、审阅与工作记录状态
+  components/        共用菜单、标签与弹窗
+  features/          审阅流程、阅读区域与工作记录恢复
+  core/              建议解析、窗口计算与纯逻辑测试
+  services/          Tauri IPC 接口
+src-tauri/           Rust 文件、模型、凭据、持久化与单实例功能
+shared/              前后端共用的检查策略
+fixtures/            人工样例和本机模拟模型服务
+assets/              图标源文件
+scripts/             项目检查与发布打包脚本
+.github/             CI、Release、依赖更新与协作模板
+docs/                使用、架构、维护文档和历史审查记录
 ```
 
-保存只替换已确认的译文 `message`，保留数组顺序、`name`、其他字段及未修改条目，输出会重新格式化。禁止覆盖本次导入的原文与译文文件。
+Git 保留源码、锁文件、图标、测试、样例和文档；依赖目录、缓存、个人配置和发行产物不入库。文档入口见 [docs/README.md](docs/README.md)。
 
-### 模型服务
+## 维护与发布
 
-支持 OpenAI 兼容的 Chat Completions 文本接口，使用非流式请求。Base URL 可以填 `https://provider.example/v1`，也可以填完整的 `/chat/completions` 地址。“获取模型”从同一接口根路径请求 `/models`，支持输入筛选和选择；服务未提供列表时可手动填写模型名称。
+PR 与 `main` 提交在 Windows 执行项目元数据校验、前端测试和构建、Rust 格式检查、Clippy 与测试。推送 `vX.Y.Z` 标签会重新验证后构建安装包、便携包、源码包及 SHA-256，并创建 **Release 草稿**，由维护者完成验收后公开。
 
-API Key 为选填，本地服务可留空。已有密钥时输入框显示“已保存密钥”，不返回密钥本身；未编辑时，同源地址继续使用它，输入新值可更换，“不使用密钥”后保存停止复用。更换主机、协议或端口时不复用旧密钥。获取模型和测试连接只使用当前表单，不修改已保存设置；配置保存失败会尝试恢复原凭据，恢复失败会明确报错。
+- [参与贡献](CONTRIBUTING.md) · [报告问题](https://github.com/LightYuki/Proofreader/issues) · [安全报告](SECURITY.md)
+- [变更记录](CHANGELOG.md) · [发布流程](docs/RELEASING.md) · [第三方依赖](docs/DEPENDENCIES.md)
+- [开源建设规划与验收状态](docs/OPEN_SOURCE_PLAN.md)
 
-读取设置失败仍可打开设置，重试保留表单；确需重建时先备份原配置。密钥读取错误独立显示；凭据暂不可用时，无密钥选择会持久化，旧凭据不会在下次启动自动启用。配置文件缺失或重建后也不会自动复用无法确认归属的密钥。开始检查前先执行本地校验，失败不重置已有批次。
+当前不提供自动对齐、场景识别、术语库、全部自动采用或超长文本自动拆分；超大文件性能和其他操作系统仍待验证。
 
-Base URL 和模型名称保存在应用配置目录，API Key 保存在 Windows 凭据管理器。该目录的 `workspace.json` 保存文件路径及审阅进度，不存储密钥，也不替代校润输出。校润时会将本批原文、译文、说话人和校润要求发送给配置的模型服务。不同服务商的兼容性需使用实际接口确认。
+## 许可证
 
-### 上下文与重试
-
-每批提供前 15 条、检查区最多 30 条、后 15 条，共最多 60 组原文／译文。处理完检查区后推进 30 条，文件首尾自然截断。模型只能修改检查区，建议按原始索引合并。
-
-停止会取消当前请求并保留已完成结果；继续检查处理剩余批次。修改要求后继续或重试，可选择按原要求继续，或按当前要求重新检查；当前编辑的要求不会被旧快照覆盖。连接改变时会提示使用当前连接。旧记录没有原要求快照时只能开启新轮。失败批次可单独重试，不自动重复请求。
-
-重新检查仍使用导入时的原译文，保留已采用、已保留原译及人工草稿。旧模型建议在对应新批次成功后才替换，保留的旧结果会注明来源。Windows 同一配置目录只保留一个工作进程，重复启动尝试激活原窗口。
-
-## 当前范围
-
-- 保存模型配置、校润要求、文件标签、最近记录及各文件审阅进度；撤销历史不持久化。
-- 不自动识别场景／剧情分支，不提供自动对齐、术语库、剧情摘要或自动全部采用。
-- 固定使用 60／30 窗口；超长文本导致接口拒绝或输出截断时，将该批标为失败，暂不自动拆分。
-- 连续正文尚未做虚拟列表，超大文件性能待进一步验证。
-- 当前以 Windows 为目标；安装包签名、自动更新和其他平台支持未纳入第一版。
-
-产品规则与开发约定见 [PRODUCT_SPEC.md](./docs/PRODUCT_SPEC.md) 和 [TECH_STACK.md](./docs/TECH_STACK.md)。模块划分、固定参数与后续扩展入口见 [ARCHITECTURE_REVIEW.md](./docs/ARCHITECTURE_REVIEW.md)。
+Copyright (C) 2026 LightYuki and contributors。项目原创内容按 **GNU GPL v3 或更新版本**发布，全文见 [LICENSE](LICENSE)，授权声明见 [NOTICE](NOTICE)。第三方组件遵守各自许可证，用户导入的文本不属于本项目授权范围。
