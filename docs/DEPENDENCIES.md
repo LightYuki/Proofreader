@@ -18,11 +18,13 @@
 
 1. 从锁定版本安装依赖，列出实际分发的直接及传递组件、版本、来源与 SPDX 许可表达式。
 2. 对照上游 LICENSE/NOTICE 和双许可选项确认与 GPLv3 的兼容性；特殊条款或未知许可逐项处理。
-3. 汇总需要保留的版权和许可全文到 `THIRD_PARTY_NOTICES.txt`，同时纳入安装包、便携包和 Release。目前脚手架仅携带本项目 LICENSE/NOTICE，**尚未完成这份第三方许可汇编**。
-4. 确认对应源码的提供方式。当前工作流的 `source.zip` 只包含本项目 Git 跟踪的源码、锁文件和构建脚本，**不包含所有第三方依赖源码**。按实际许可证补齐依赖源码、修改补丁和必要构建材料，并与二进制同处可访问的发布入口；锁文件不等于对应源码归档。
+3. 使用 `npm run licenses` 生成 `THIRD_PARTY_NOTICES.txt` 和 `third-party/inventory.json`。目前覆盖 Windows 目标的 315 个 Rust 组件（含构建依赖）及 6 个 npm 运行依赖。许可汇编纳入安装包、便携包和 Release；CI 使用 `npm run licenses:check` 防止锁文件变化后遗漏更新。
+4. 发布构建执行 `node scripts/prepare-licenses.mjs --check --sources`，导出上述锁定依赖的原始源码包，打包为 `dependency-sources.zip`，与本项目 `source.zip` 一起提供。依赖代码未修改，MPL 覆盖文件保留原有许可。该快照不承诺完全离线构建；构建工具、Node/Rust 工具链及 npm 开发依赖按 README 和锁文件安装。
 5. 确认图标、样例及历史文档可以公开，不包含受限剧本文本或私人资料。
 
-完成前，自动生成的 Release 应保留为草稿。生成依赖清单和 notices、收集必要源码可在首次打包验收时实现自动化；当前不声称已完成完整许可审计。
+部分 crates 发布包未附许可证文件，已按 `.cargo_vcs_info.json` 指向的上游提交补回原始文本，来源记录在 `third-party/license-overrides.json`。selectors 的清单和源码头声明 MPL-2.0，补充标准 MPL 文本；原始源码头在依赖源码附件中保留。更新这些组件时必须重新核对版本和来源。新增未知许可证会阻止生成，维护者审查后才能更新允许列表。
+
+这些检查用于核对分发材料，不替代对新素材或特殊授权条件的人工审查。平台 WebView2 由微软分发，不在依赖源码快照中；安装器通过官方引导程序获取运行时。
 
 ## 漏洞与更新
 

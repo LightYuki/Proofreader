@@ -22,12 +22,14 @@ $installers = @(Get-ChildItem -LiteralPath 'src-tauri/target/release/bundle/nsis
 if ($installers.Count -ne 1) { throw 'Expected exactly one NSIS installer from a clean build.' }
 New-Item -ItemType Directory -Path $artifactDirectory, $portableDirectory -Force | Out-Null
 Copy-Item -LiteralPath $installers[0].FullName -Destination "$artifactDirectory/Proofread-$Tag-windows-x64-setup.exe"
-Copy-Item -LiteralPath 'src-tauri/target/release/proofread.exe', 'LICENSE', 'NOTICE', 'README.md', 'CONTRIBUTING.md', 'SECURITY.md', 'CHANGELOG.md' -Destination $portableDirectory
+Copy-Item -LiteralPath 'src-tauri/target/release/proofread.exe', 'LICENSE', 'NOTICE', 'THIRD_PARTY_NOTICES.txt', 'README.md', 'CONTRIBUTING.md', 'SECURITY.md', 'CHANGELOG.md' -Destination $portableDirectory
 Copy-Item -LiteralPath 'docs', 'fixtures' -Destination $portableDirectory -Recurse
 Compress-Archive -LiteralPath $portableDirectory -DestinationPath "$artifactDirectory/Proofread-$Tag-windows-x64-portable.zip"
 git archive --format=zip "--prefix=Proofreader-$Tag/" "--output=$artifactDirectory/Proofreader-$Tag-source.zip" HEAD
 if ($LASTEXITCODE -ne 0) { throw 'Source archive creation failed.' }
-Copy-Item -LiteralPath 'LICENSE', 'NOTICE' -Destination $artifactDirectory
+if (-not (Test-Path -LiteralPath 'release/dependency-sources/inventory.json')) { throw 'Dependency source snapshot is required.' }
+Compress-Archive -LiteralPath 'release/dependency-sources' -DestinationPath "$artifactDirectory/Proofreader-$Tag-dependency-sources.zip"
+Copy-Item -LiteralPath 'LICENSE', 'NOTICE', 'THIRD_PARTY_NOTICES.txt', 'third-party/inventory.json' -Destination $artifactDirectory
 
 $version = $Tag.Substring(1)
 $changelog = Get-Content -LiteralPath CHANGELOG.md -Raw
@@ -42,18 +44,19 @@ $releaseNotes
 
 - setup.exe：Windows x64 安装包；缺少 WebView2 时需要联网安装运行时。
 - portable.zip：解压运行 proofread.exe，需要已安装 WebView2；工作记录仍保存在用户配置目录。
-- source.zip：本项目该标签的源码、构建脚本和锁文件；第三方依赖源码另行审查和提供。
+- source.zip：本项目该标签的源码、构建脚本和锁文件。
+- dependency-sources.zip：Windows 目标的 Rust 依赖与 npm 运行依赖源码；含原始许可文件。
 - SHA256SUMS.txt：下载文件的 SHA-256 校验值。
 
 许可：GPL-3.0-or-later。当前安装包未进行代码签名，无自动更新。
 源码：https://github.com/LightYuki/Proofreader/tree/$Tag
 
-## 发布前验收（草稿）
+## 验证范围
 
-- [ ] 在干净 Windows 环境完成安装、启动、升级及卸载验收。
-- [ ] 用 fixtures 完成导入、校润、人工确认、导出和重启恢复。
-- [ ] 按 docs/DEPENDENCIES.md 补齐第三方许可、版权声明及所需对应源码。
-- [ ] 核对全部附件与 SHA-256，然后移除本验收段并公开 Release。
+- CI 执行前端测试与生产构建、Rust 格式检查、Clippy、原生测试及第三方许可一致性检查。
+- 安装包由 GitHub Actions 的 Windows x64 环境构建，未进行代码签名。
+- 首版尚未完成独立干净机器上的安装、升级和卸载全流程验收；真实模型服务兼容性请按需验证。
+- 原文与译文建议保留备份，模型建议需人工确认。
 "@
 Set-Content -LiteralPath "$artifactDirectory/RELEASE_NOTES.md" -Value $notes -Encoding utf8NoBOM
 $checksums = Get-ChildItem -LiteralPath $artifactDirectory -File | Sort-Object Name | ForEach-Object {

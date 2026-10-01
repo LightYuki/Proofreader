@@ -22,6 +22,8 @@
     "preview": "vite preview --host 127.0.0.1",
     "test": "vitest run",
     "check:project": "node scripts/check-project.mjs",
+    "licenses": "node scripts/prepare-licenses.mjs",
+    "licenses:check": "node scripts/prepare-licenses.mjs --check",
     "check": "npm run check:project && npm test && npm run build",
     "tauri": "tauri"
   },

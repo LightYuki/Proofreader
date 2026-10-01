@@ -57,6 +57,7 @@ npm run tauri dev
 
 ```powershell
 npm run check
+npm run licenses:check
 cargo fmt --manifest-path src-tauri/Cargo.toml --all -- --check
 cargo clippy --manifest-path src-tauri/Cargo.toml --locked --all-targets -- -D warnings
 cargo test --manifest-path src-tauri/Cargo.toml --locked

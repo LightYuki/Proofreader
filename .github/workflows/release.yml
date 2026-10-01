@@ -38,6 +38,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Release commit must be on main.' }
       - run: rustup show active-toolchain
       - run: npm ci
+      - name: Verify notices and collect dependency sources
+        run: node scripts/prepare-licenses.mjs --check --sources
       - name: Build Windows x64 NSIS installer
         run: npm run tauri -- build --bundles nsis -- --locked
       - name: Collect release artifacts

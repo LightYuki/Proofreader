@@ -16,7 +16,7 @@
 
 ## 准备版本
 
-1. 完成 [第三方依赖和对应源码清单](DEPENDENCIES.md)，补齐 notices 的生成与安装包/便携包收录；这是首次公开二进制前的必做项。
+1. 按 [第三方依赖和对应源码清单](DEPENDENCIES.md) 运行 `npm run licenses:check`。变更依赖后重新生成 notices 并核对新增许可证；发布构建会收集依赖源码。
 2. 发布新版本时同步修改 `package.json`、`src-tauri/Cargo.toml`、`src-tauri/tauri.conf.json`。执行 `npm install --package-lock-only --ignore-scripts` 和 `cargo check --manifest-path src-tauri/Cargo.toml` 更新两份锁文件，然后运行 `npm run check:project`。
 3. 将 CHANGELOG 的 Unreleased 内容整理到对应版本节并写入真实发布日期。首次发布 1.0.0 只补日期，不必升级版本。
 4. 提交 PR，完成 CI 与相关手动验收并合并到 `main`。当前工作流接受稳定 `X.Y.Z`，预发布标签支持可后续加入。
@@ -40,7 +40,8 @@ git push origin v1.0.0
 - `Proofread-vX.Y.Z-windows-x64-setup.exe`
 - `Proofread-vX.Y.Z-windows-x64-portable.zip`
 - `Proofreader-vX.Y.Z-source.zip`（本项目源码，依赖源码要求见上文）
-- `LICENSE`、`NOTICE`、`RELEASE_NOTES.md`、`SHA256SUMS.txt`
+- `Proofreader-vX.Y.Z-dependency-sources.zip`（Windows 目标 Rust 依赖及 npm 运行依赖源码）
+- `LICENSE`、`NOTICE`、`THIRD_PARTY_NOTICES.txt`、`inventory.json`、`RELEASE_NOTES.md`、`SHA256SUMS.txt`
 
 便携包只是免安装分发，配置和凭据仍使用 Windows 用户目录与凭据管理器，并非所有数据随程序目录移动。
 
@@ -50,7 +51,7 @@ git push origin v1.0.0
 - 用 `fixtures` 测试导入、模拟模型调用、采用/保留、导出、停止/恢复和重启恢复。验证输入文件未改动、额外字段保留。
 - 按需用获准发送的人工文本测试真实服务，记录供应商兼容性，不公开密钥。
 - 核对二进制版本、源码标签、许可汇编、对应源码、文件名和校验值。可用 `Get-FileHash -Algorithm SHA256 <文件>` 校验下载内容。
-- Release 描述清楚写明未签名、WebView2 要求、支持范围和已知限制；完成草稿清单后再手动 Publish release。
+- Release 描述清楚写明未签名、WebView2 要求、支持范围、实际完成的验证和未验收项。默认生成草稿；维护者决定公开时必须保留真实的验证边界。
 
 本地打包脚本假设干净的输出目录，避免混入旧包。GitHub 的 Re-run jobs 会使用新工作区，可在同一标签下更新已有草稿；已公开的 Release 不允许被该工作流覆盖。失败时先查看具体 job；若需修改源码或构建配置，使用新的补丁版本和标签，不移动已有标签。
 

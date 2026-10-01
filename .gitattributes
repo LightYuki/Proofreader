@@ -4,3 +4,8 @@
 *.icns binary
 *.exe binary
 *.zip binary
+
+# Preserve upstream notices and keep generated license inventories collapsed in reviews.
+THIRD_PARTY_NOTICES.txt linguist-generated=true -whitespace
+third-party/inventory.json linguist-generated=true
+third-party/licenses/** linguist-vendored=true -whitespace

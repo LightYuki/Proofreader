@@ -5,6 +5,7 @@
 ## 验证
 
 - [ ] `npm run check`
+- [ ] `npm run licenses:check`（依赖变化后先运行 `npm run licenses` 并核对许可）
 - [ ] `cargo fmt --manifest-path src-tauri/Cargo.toml --all -- --check`
 - [ ] `cargo clippy --manifest-path src-tauri/Cargo.toml --locked --all-targets -- -D warnings`
 - [ ] `cargo test --manifest-path src-tauri/Cargo.toml --locked`

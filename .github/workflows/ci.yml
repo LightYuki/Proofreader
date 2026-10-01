@@ -28,6 +28,7 @@ jobs:
         run: rustup show active-toolchain
       - run: npm ci
       - run: npm run check
+      - run: npm run licenses:check
       - run: cargo fmt --manifest-path src-tauri/Cargo.toml --all -- --check
       - run: cargo clippy --manifest-path src-tauri/Cargo.toml --locked --all-targets -- -D warnings
       - run: cargo test --manifest-path src-tauri/Cargo.toml --locked
